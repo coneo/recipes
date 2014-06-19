@@ -1,0 +1,5 @@
+cmake_minimum_required (VERSION 2.6)
+project (Test_cmake)
+ADD_SUBDIRECTORY(hello)
+ADD_SUBDIRECTORY(test)
+#add_executable(Test_cmake test_cmake.cpp)
