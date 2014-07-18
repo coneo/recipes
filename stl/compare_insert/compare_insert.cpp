@@ -27,7 +27,7 @@ bool Rank::operator == (Rank *a)
 
 struct Compare
 {
-		bool operator () (Rank* a, Rank *b)
+		bool operator () (const Rank* a, const Rank *b) //a is less than b
 		{
 				return (a->level!=b->level)?(a->level < b->level):(a->time > b->time);
 		}
@@ -35,8 +35,9 @@ struct Compare
 
 int main(int argc, char**argv)
 {
-		std::set<Rank*, Compare> ranks;
-		//std::set<Rank*> ranks;
+		//std::multiset<Rank*, Compare> ranks; //size == 3
+		std::set<Rank*, Compare> ranks; //size == 1
+		//std::set<Rank*> ranks; //size == 3
 
 		int id = 0;
 		for (int i = 0; i < 3; ++i,++id)
