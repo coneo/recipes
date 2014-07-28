@@ -14,6 +14,7 @@ Logger::~Logger()
 {
 }
 
+/*
 void Logger::log(LogLevel level, char* format, ...)
 {
     int MAX_BUF_SIZE = 4*1000*100;
@@ -27,11 +28,11 @@ void Logger::log(LogLevel level, char* format, ...)
 
     printf("%s",buf);
     //append cb
-}
+}*/
 
-const char* Logger::getLevelStr()
+const char* Logger::getLevelStr(LogLevel l)
 {
-    switch (mLevel)
+    switch (l)
     {
         case LL_DEBUG:
             return "DEBUG";
@@ -44,7 +45,11 @@ const char* Logger::getLevelStr()
         case LL_ERROR:
             return "ERROR";
         default:
-            return "";
+            return "UNKNOWN";
     }
-    return "";
+    return "UNKNOWN";
 }
+
+void Logger::formatTime()
+{
+};

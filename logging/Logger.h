@@ -7,7 +7,9 @@
 
 #include <functional>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
+#include <time.h>
 
 enum LogLevel
 {
@@ -22,16 +24,23 @@ enum LogLevel
 class Logger
 {
 public:
-	Logger();
-	~Logger();
+    Logger();
+    ~Logger();
 
-    void log(LogLevel level, char* format, ...);
+    template<typename... Args>
+    void log(LogLevel level, const char* file, int line,  Args... args)
+    {
+	mStream << getLevelStr(level) << ": ";
+	print(args...);
+	mStream << " - " << file << ":" << line;
+	mStream << "\n";
+    }
 
     void formatTime();
 
     void setLogLevel(LogLevel l){ mLevel = l; }
     LogLevel level() const { return mLevel; }
-    const char* getLevelStr();
+    const char* getLevelStr(LogLevel l);
 
 public:
     void print(const char* s)
@@ -40,7 +49,7 @@ public:
         {
             if (*s == '%' && *++s != '%')
                 throw std::runtime_error("miss arg");
-            std::cout << *s++;
+            mStream << *s++;
         }
     }
 
@@ -52,30 +61,40 @@ public:
         {
             if (*s == '%' && *++s != '%')
             {
-                std::cout << value;
+                mStream << value;
                 return print(++s, args...);
             }
-            std::cout << *s++;
+            mStream << *s++;
         }
         throw std::runtime_error("extra arg");
     }
 
+    void printout()
+    {
+	std::cout << mStream.str();
+	mStream.clear();
+    }
 public:
     typedef std::function<void ()> AppendCallback;
+    typedef std::stringstream LogStream;
+
+public:
     void setAppendCallback(AppendCallback cb){ mAppendcb = cb; }
 
 private:
     AppendCallback mAppendcb;
     LogLevel mLevel;
+    LogStream mStream;
 };
 
 extern Logger gLogger;
 
-/*
-#define LOG_DEBUG(log_fmt, log_arg...) \
+#define LOG_DEBUG(...) \
 	do{\
-        gLogger.log(LL_DEBUG, ""log_fmt" %s,%d \n", \
-                ##log_arg, __FILE__,__LINE__); \
+        gLogger.log(LL_DEBUG, __FILE__,__LINE__, __VA_ARGS__); \
 	}while(0)
 
-*/
+#define LOG_TRACE(...) \
+	do{\
+        gLogger.log(LL_TRACE, __FILE__,__LINE__, __VA_ARGS__); \
+	}while(0)
