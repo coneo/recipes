@@ -52,4 +52,9 @@ const char* Logger::getLevelStr(LogLevel l)
 
 void Logger::formatTime()
 {
-};
+    time_t now;
+    now = time(&now);
+    struct tm vtm;
+    localtime_r(&now, &vtm);
+    mStream << vtm.tm_year+1990 <<"-"<<vtm.tm_mon+1<<"-"<<vtm.tm_mday<<" "<<vtm.tm_hour<<":"<<vtm.tm_min<<":"<<vtm.tm_sec;
+}

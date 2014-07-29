@@ -30,10 +30,11 @@ public:
     template<typename... Args>
     void log(LogLevel level, const char* file, int line,  Args... args)
     {
-	mStream << getLevelStr(level) << ": ";
-	print(args...);
-	mStream << " - " << file << ":" << line;
-	mStream << "\n";
+        formatTime();
+        mStream <<" "<< getLevelStr(level) << ": ";
+        print(args...);
+        mStream << " - " << file << ":" << line;
+        mStream << "\n";
     }
 
     void formatTime();
