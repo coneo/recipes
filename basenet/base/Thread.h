@@ -4,6 +4,8 @@
 #include <boost/function.hpp>
 #include <pthread.h>
 
+namespace Walle
+{
 class Thread : boost::noncopyable
 {
 public:
@@ -25,3 +27,9 @@ private:
     ThreadFunc mFunc;
     std::string mName;
 };
+
+namespace CurrentThread
+{
+    pid_t tid();
+}
+} //namespace Walle

@@ -1,4 +1,8 @@
 #include "EventLoop.h"
+#include <poll.h>
+#include <iostream>
+
+using namespace Walle;
 
 __thread EventLoop* t_loopInThisThread = 0;
 
@@ -6,11 +10,11 @@ EventLoop::EventLoop()
 	: mLooping(false),
 	mThreadID(CurrentThread::tid())
 {
-	LOG_TRACE << "EventLoop create" << this << "in thread" << mThreadID;
+    std::cout << "EventLoop create " << this << " in thread" << mThreadID << std::endl;
 	if (t_loopInThisThread)
 	{
-		LOG_FATAL << "Another EventLoop" << t_loopInThisThread
-			  << "exist in this thread" << mThreadID;
+	    std::cout << "Another EventLoop" << t_loopInThisThread
+			  << "exist in this thread" << mThreadID << std::endl;
 	}
 	else
 	{
@@ -32,13 +36,14 @@ void EventLoop::loop()
 
 	::poll(NULL, 0, 5*1000);
 
-	LOG_TRACE << "EventLoop" << this << "stop looping";
+	std::cout << "EventLoop" << "stop looping" << std::endl;
 	mLooping = false;
 }
 
 void EventLoop::abortNotInLoopThread()
 {
-	LOG_FATAL << "EventLoop::abortNotInLoopThread - EventLoop" << this
+    std::cout << "EventLoop::abortNotInLoopThread - EventLoop" << this
 		  << "was created in threadID " << mThreadID
-		  << ", current threadID is " << CurrentThread::tid();
+		  << ", current threadID is " << CurrentThread::tid() 
+		  << std::endl;
 }

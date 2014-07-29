@@ -1,7 +1,11 @@
-#ifndef WALLE_NET_EVENTLOOP_H_
-#define WALLE_NET_EVENTLOOP_H_
+#pragma once
 
+#include "../base/Thread.h"
 #include <boost/noncopyable.hpp>
+
+namespace Walle
+{
+class Channel;
 
 class EventLoop : boost::noncopyable
 {
@@ -28,4 +32,4 @@ private:
 	bool mLooping;
 	const pid_t mThreadID;
 };
-#endif
+} //namespace Walle

@@ -1,7 +1,10 @@
 #include "Thread.h"
+#include <sys/syscall.h>
 #include <stdio.h>
 
 void* startThread(void*data);
+
+using namespace Walle;
 
 Thread::Thread(const ThreadFunc& func, std::string name)
     : mPthreadID(0),
@@ -48,4 +51,17 @@ void* startThread(void *data)
     Thread* thread = static_cast<Thread*>(data);
     thread->runThread();
     return NULL;
+}
+
+namespace
+{
+    pid_t gettid()
+    {
+	return static_cast<pid_t>(::syscall(SYS_gettid));
+    }
+}
+
+pid_t CurrentThread::tid()
+{
+    return gettid();
 }
