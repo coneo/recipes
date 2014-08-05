@@ -1,6 +1,8 @@
 #include <random>
 #include <iostream>
+#include <sstream>
 
+using namespace std;
 void roll_a_fair_die()
 {
     //std::random_device rdev{}; //change seed by time
@@ -21,5 +23,15 @@ bool testEngineEqual(const std::default_random_engine &e1,
 
 int main()
 {
-    roll_a_fair_die();
+    //roll_a_fair_die();
+
+    std::stringstream ss;
+    int a {3};
+    int b {15};
+    ss << a << b;
+    cout << "a=" << a << "b=" << b <<endl;
+
+    int c=0,d=0;
+    ss >> c >> d;
+    cout << "c=" << c << "d=" << d <<endl;
 }

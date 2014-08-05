@@ -4,17 +4,28 @@
 #include <random>
 
 namespace water {
+
+template<typename Engine = std::default_random_engine>
 class RandomEngine
 {
-pulbic:
-    RandomEngine() = default;
+public:
+    typedef typename Engine::result_type result_type;
+
+    RandomEngine(result_type seed = Engine::default_seed) : 
+	m_engine(seed)
+    {
+    }
     ~RandomEngine() = default;
 
-    void seed(int value){ m_engine.seed(value); }
+    void seed(result_type value){ m_engine.seed(value); }
+
+    unsigned int random() { return m_dist(m_engine); }
+
+    void discard(unsigned long long step) { m_engine.discard(step); }
 
 private:
-    std::default_random_engine m_engine;
-    std::uniform_int_distribution m_dist;
+    Engine m_engine;
+    std::uniform_int_distribution<int> m_dist; //FIXME: use template
 };
 
 }
