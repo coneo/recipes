@@ -1,6 +1,8 @@
-#include "Logger.h"
+#include "logger.h"
 #include <iostream>
 #include <functional>
+
+using namespace water;
 
 struct stFoo
 {

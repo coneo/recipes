@@ -1,9 +1,11 @@
 /*
+ * date: 2014-07-27 12:02:02
  * format : data time level msg file line 
  * example: 2014-07-27 09:41:23 DEBUG: hello shok - Loggging_test.cpp:34
  *
  */
-#pragma once
+#ifndef WATER_BASE_LOGGER_HPP
+#define WATER_BASE_LOGGER_HPP
 
 #include <functional>
 #include <iostream>
@@ -11,11 +13,12 @@
 #include <stdexcept>
 #include <time.h>
 
-enum LogLevel
+namespace water{
+
+enum class LogLevel : uint8_t
 {
 	LL_DEBUG,
 	LL_TRACE,
-	LL_NOTICE,
 	LL_WARN,
 	LL_ERROR,
 	LL_MAX
@@ -24,23 +27,25 @@ enum LogLevel
 class Logger
 {
 public:
-    Logger();
-    ~Logger();
+    Logger() = default;
+    ~Logger() = default;
 
     template<typename... Args>
     void log(LogLevel level, const char* file, int line,  Args... args)
     {
         formatTime();
-        mStream <<" "<< getLevelStr(level) << ": ";
+        m_stream <<" "<< getLevelStr(level) << ": ";
         print(args...);
-        mStream << " - " << file << ":" << line;
-        mStream << "\n";
+        m_stream << " - " << file << ":" << line;
+        m_stream << "\n";
     }
 
     void formatTime();
 
-    void setLogLevel(LogLevel l){ mLevel = l; }
-    LogLevel level() const { return mLevel; }
+    void setLogLevel(LogLevel l){ m_level = l; }
+
+    LogLevel level() const { return m_level; }
+
     const char* getLevelStr(LogLevel l);
 
 public:
@@ -50,7 +55,7 @@ public:
         {
             if (*s == '%' && *++s != '%')
                 throw std::runtime_error("miss arg");
-            mStream << *s++;
+            m_stream << *s++;
         }
     }
 
@@ -62,40 +67,54 @@ public:
         {
             if (*s == '%' && *++s != '%')
             {
-                mStream << value;
+                m_stream << value;
                 return print(++s, args...);
             }
-            mStream << *s++;
+            m_stream << *s++;
         }
         throw std::runtime_error("extra arg");
     }
 
     void printout()
     {
-	std::cout << mStream.str();
-	mStream.clear();
+        std::cout << m_stream.str();
+        m_stream.clear();
     }
 public:
     typedef std::function<void ()> AppendCallback;
-    typedef std::stringstream LogStream;
+    typedef std::stringstream LogStream; //FIXME: move to a better one
 
 public:
-    void setAppendCallback(AppendCallback cb){ mAppendcb = cb; }
+    void setAppendCallback(AppendCallback cb){ m_appendcb = cb; }
 
 private:
-    AppendCallback mAppendcb;
-    LogLevel mLevel;
-    LogStream mStream;
+    AppendCallback m_appendcb;
+    LogLevel m_level;
+    LogStream m_stream;
 };
 
-extern Logger gLogger;
 
 #define LOG_DEBUG(...) \
 	do{\
-        gLogger.log(LL_DEBUG, __FILE__,__LINE__, __VA_ARGS__); \
+        gLogger.log(LogLevel::LL_DEBUG, __FILE__,__LINE__, __VA_ARGS__); \
 	}while(0)
 
 #define LOG_TRACE(...) \
 	do{\
-        gLogger.log(LL_TRACE, __FILE__,__LINE__, __VA_ARGS__); \
+        gLogger.log(LogLevel::LL_TRACE, __FILE__,__LINE__, __VA_ARGS__); \
 	}while(0)
+
+#define LOG_WARN(...) \
+	do{\
+        gLogger.log(LogLevel::LL_WARN, __FILE__,__LINE__, __VA_ARGS__); \
+	}while(0)
+
+#define LOG_ERROR(...) \
+	do{\
+        gLogger.log(LogLevel::LL_ERROR, __FILE__,__LINE__, __VA_ARGS__); \
+	}while(0)
+}
+
+extern water::Logger gLogger;
+
+#endif //#define WATER_BASE_LOGGER_HPP

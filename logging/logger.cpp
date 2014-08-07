@@ -1,18 +1,12 @@
-#include "Logger.h"
+#include "logger.h"
 
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
 
+using namespace water;
+
 Logger gLogger;
-
-Logger::Logger()
-{
-}
-
-Logger::~Logger()
-{
-}
 
 /*
 void Logger::log(LogLevel level, char* format, ...)
@@ -34,15 +28,13 @@ const char* Logger::getLevelStr(LogLevel l)
 {
     switch (l)
     {
-        case LL_DEBUG:
+        case LogLevel::LL_DEBUG:
             return "DEBUG";
-        case LL_TRACE:
+        case LogLevel::LL_TRACE:
             return "TRACE";
-        case LL_NOTICE:
-            return "NOTICE";
-        case LL_WARN:
+        case LogLevel::LL_WARN:
             return "WARN";
-        case LL_ERROR:
+        case LogLevel::LL_ERROR:
             return "ERROR";
         default:
             return "UNKNOWN";
@@ -56,5 +48,5 @@ void Logger::formatTime()
     now = time(&now);
     struct tm vtm;
     localtime_r(&now, &vtm);
-    mStream << vtm.tm_year+1990 <<"-"<<vtm.tm_mon+1<<"-"<<vtm.tm_mday<<" "<<vtm.tm_hour<<":"<<vtm.tm_min<<":"<<vtm.tm_sec;
+    m_stream << vtm.tm_year+1990 <<"-"<<vtm.tm_mon+1<<"-"<<vtm.tm_mday<<" "<<vtm.tm_hour<<":"<<vtm.tm_min<<":"<<vtm.tm_sec;
 }
