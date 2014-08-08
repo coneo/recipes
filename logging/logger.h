@@ -27,6 +27,9 @@ enum class LogLevel : uint8_t
 class Logger
 {
 public:
+    typedef std::function<void(const char*,uint32_t)> AppendCallback;
+    typedef std::stringstream LogStream; //FIXME: move to a better one
+
     Logger() = default;
     ~Logger() = default;
 
@@ -38,7 +41,13 @@ public:
         print(args...);
         m_stream << " - " << file << ":" << line;
         m_stream << "\n";
+
+	m_appendcb(m_stream.str().data(), (uint32_t)(m_stream.str().size()));
+	m_stream.str("");
+	m_stream.clear();
     }
+
+    void setAppendCallback(AppendCallback cb){ m_appendcb = cb; }
 
     void formatTime();
 
@@ -80,12 +89,6 @@ public:
         std::cout << m_stream.str();
         m_stream.clear();
     }
-public:
-    typedef std::function<void ()> AppendCallback;
-    typedef std::stringstream LogStream; //FIXME: move to a better one
-
-public:
-    void setAppendCallback(AppendCallback cb){ m_appendcb = cb; }
 
 private:
     AppendCallback m_appendcb;

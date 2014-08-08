@@ -32,10 +32,11 @@ public:
 
     uint32_t length() const { return m_cur - m_data; }
 
+    uint32_t remain() const { return static_cast<uint32_t>(end() - m_cur); }
+    void clear() { m_cur = m_data; }
+
 private:
     const char* end() const { return m_data + sizeof(m_data); }
-
-    uint32_t remain() const { return static_cast<uint32_t>(end() - m_cur); }
 
 private:
     char m_data[SIZE];

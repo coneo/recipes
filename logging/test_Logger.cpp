@@ -1,4 +1,6 @@
 #include "logger.h"
+#include "backend_logger.h"
+#include <unistd.h>
 #include <iostream>
 #include <functional>
 
@@ -16,8 +18,21 @@ Logger::LogStream& operator << (Logger::LogStream& ss, stFoo& foo)
     return ss;
 }
 
+void printout(const char* msg, uint32_t len)
+{
+    printf("%s",msg);
+}
+
+void zerofunc()
+{
+}
+
 int main()
 {
+    using namespace std::placeholders;
+    BackendLogger bkLogger;
+    gLogger.setAppendCallback(std::bind(&BackendLogger::append, &bkLogger,_1, _2));
+    bkLogger.start();
     LOG_DEBUG("int=%d,str=%s", 25,"hello");
     LOG_DEBUG("hello logging");
 
@@ -26,5 +41,8 @@ int main()
     std::string s{"logging"};
     stFoo foo;
     LOG_TRACE("int=%u,float=%f, %s", a, f, foo);
-    gLogger.printout();
+
+    sleep(5);
+    bkLogger.stop();
+    //gLogger.printout();
 }

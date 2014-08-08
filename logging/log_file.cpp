@@ -1,22 +1,24 @@
-#include "WriteFile.h"
+#include "log_file.h"
 #include <stdio.h>
 
-WriteFile::WriteFile(std::string filename)
+using namespace water;
+
+LogFile::LogFile(std::string filename)
     : fp(::fopen(filename.c_str(), "a"))
 {
 }
 
-WriteFile::~WriteFile()
+LogFile::~LogFile()
 {
     ::fclose(fp);
 }
 
-size_t WriteFile::write(const char* msg, const size_t len)
+size_t LogFile::write(const char* msg, const size_t len)
 {
     return ::fwrite(msg, 1, len, fp);
 }
 
-void WriteFile::append(const char* msg, const size_t len)
+void LogFile::append(const char* msg, const size_t len)
 {
     size_t n = write(msg, len);
     size_t rest = len - n;
@@ -34,7 +36,7 @@ void WriteFile::append(const char* msg, const size_t len)
     }
 }
 
-void WriteFile::flush()
+void LogFile::flush()
 {
     ::fflush(fp);
 }

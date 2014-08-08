@@ -1,8 +1,10 @@
-#include "WriteFile.h"
+#include "log_file.h"
+
+using namespace water;
 
 int main()
 {
-    WriteFile file("./test.file");
+    LogFile file("./test.file");
 
     char msg[32] = "hello logging";
     file.append(msg, sizeof(msg));
