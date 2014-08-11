@@ -1,4 +1,4 @@
-CXXFLAGS= -std=c++11 -g -Wall
+CXXFLAGS= -std=c++11 -g -Wall -D_HXQ_DEBUG
 
 HEADERS=logger.h #FIXME
 TESTS= test_Logger test_WriteFile test_LogBuffer test_Vector
@@ -19,4 +19,4 @@ test_LogBuffer: test_LogBuffer.cpp
 test_Vector: test_Vector.cpp
 
 clean:
-	rm -f $(TESTS) *.file
+	rm -f $(TESTS) *.log

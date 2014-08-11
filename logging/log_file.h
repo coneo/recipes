@@ -11,15 +11,15 @@ public:
     LogFile(std::string name);
     ~LogFile();
 
-    size_t write(const char* msg, const size_t line);
+    bool load();
+
+    ssize_t writeto(const char* msg, const size_t line);
 
     void append(const char* msg, const size_t line);
 
-    void flush();
-
 private:
-
-    FILE* fp;
+    std::string m_filename;
+    int m_fd;
 };
 }
 

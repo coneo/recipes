@@ -24,8 +24,8 @@ public:
 
     void stop()
     {
-	m_running = false;
-	pthread_join(m_threadId, NULL);
+        m_running = false;
+        pthread_join(m_threadId, NULL);
     }
 
     void threadFunc();
