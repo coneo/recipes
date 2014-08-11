@@ -42,7 +42,7 @@ int main()
     stFoo foo;
     LOG_TRACE("int=%u,float=%f, %s", a, f, foo);
 
-    sleep(5);
+    sleep(10);
     bkLogger.stop();
     //gLogger.printout();
 }

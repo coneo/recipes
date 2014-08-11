@@ -8,7 +8,7 @@ all: $(TESTS)
 $(TESTS): $(HEADERS)
 
 $(TESTS):
-	g++ $(CXXFLAGS) -o $@ $(filter %.cpp,$^) -lpthread
+	g++ $(CXXFLAGS) -o $@ $(filter %.cpp,$^) -lpthread -lrt
 
 test_Logger: test_Logger.cpp logger.cpp backend_logger.cpp log_file.cpp
 

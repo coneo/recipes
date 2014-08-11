@@ -37,6 +37,8 @@ private:
     BufferVec m_fullBufs;
     bool m_running;
     pthread_t m_threadId;
+    pthread_mutex_t m_mutex;
+    pthread_cond_t  m_cond;
 };
 
 }

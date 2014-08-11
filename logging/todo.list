@@ -1,0 +1,4 @@
+1. 线程替换为C++11 thread
+2. 同步原语替换为C++11 mutex, cond
+3. 写文件接口替换为系统接口,copen -> open , cwrite -> write
+4. 多重缓冲优化
