@@ -30,7 +30,7 @@ public:
     typedef std::function<void(const char*,uint32_t)> AppendCallback;
     typedef std::stringstream LogStream; //FIXME: move to a better one
 
-    Logger() = default;
+    Logger();
     ~Logger() = default;
 
     template<typename... Args>
@@ -42,9 +42,10 @@ public:
         m_stream << " - " << file << ":" << line;
         m_stream << "\n";
 
-	m_appendcb(m_stream.str().data(), (uint32_t)(m_stream.str().size()));
-	m_stream.str("");
-	m_stream.clear();
+        if (m_appendcb)
+            m_appendcb(m_stream.str().data(), (uint32_t)(m_stream.str().size()));
+        m_stream.str("");
+        m_stream.clear();
     }
 
     void setAppendCallback(AppendCallback cb){ m_appendcb = cb; }
@@ -68,7 +69,6 @@ public:
         }
     }
 
-    //how about print(int ,std::string, struct s ...);
     template<typename T, typename... Args>
     void print(const char* s, T value, Args... args)
     {
@@ -91,31 +91,32 @@ public:
     }
 
 private:
-    AppendCallback m_appendcb;
     LogLevel m_level;
+    AppendCallback m_appendcb;
     LogStream m_stream;
 };
 
 
 #define LOG_DEBUG(...) \
-	do{\
+    do{\
         gLogger.log(LogLevel::LL_DEBUG, __FILE__,__LINE__, __VA_ARGS__); \
-	}while(0)
+    }while(0)
 
 #define LOG_TRACE(...) \
-	do{\
+    do{\
         gLogger.log(LogLevel::LL_TRACE, __FILE__,__LINE__, __VA_ARGS__); \
-	}while(0)
+    }while(0)
 
 #define LOG_WARN(...) \
-	do{\
+    do{\
         gLogger.log(LogLevel::LL_WARN, __FILE__,__LINE__, __VA_ARGS__); \
-	}while(0)
+    }while(0)
 
 #define LOG_ERROR(...) \
-	do{\
+    do{\
         gLogger.log(LogLevel::LL_ERROR, __FILE__,__LINE__, __VA_ARGS__); \
-	}while(0)
+    }while(0)
+
 }
 
 extern water::Logger gLogger;

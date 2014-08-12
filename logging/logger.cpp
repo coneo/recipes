@@ -24,6 +24,19 @@ void Logger::log(LogLevel level, char* format, ...)
     //append cb
 }*/
 
+void defaultOutput(const char* msg, uint32_t len)
+{
+    fwrite(msg, 1, len, stdout);
+}
+
+using std::placeholders::_1;
+using std::placeholders::_2;
+Logger::Logger()
+    : m_level(LogLevel::LL_DEBUG),
+      m_appendcb(std::bind(&defaultOutput,_1,_2)) //FIXME:使用backend_logger的io
+{
+}
+
 const char* Logger::getLevelStr(LogLevel l)
 {
     switch (l)
@@ -50,3 +63,4 @@ void Logger::formatTime()
     localtime_r(&now, &vtm);
     m_stream << vtm.tm_year+1990 <<"-"<<vtm.tm_mon+1<<"-"<<vtm.tm_mday<<" "<<vtm.tm_hour<<":"<<vtm.tm_min<<":"<<vtm.tm_sec;
 }
+
