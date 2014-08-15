@@ -3,10 +3,11 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <assert.h>
 
-using namespace water;
+water::Logger gLogger;
 
-Logger gLogger;
+namespace water {
 
 /*
 void Logger::log(LogLevel level, char* format, ...)
@@ -24,6 +25,9 @@ void Logger::log(LogLevel level, char* format, ...)
     //append cb
 }*/
 
+__thread char t_time[18];
+__thread time_t t_lastSecond;
+
 void defaultOutput(const char* msg, uint32_t len)
 {
     fwrite(msg, 1, len, stdout);
@@ -33,7 +37,7 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 Logger::Logger()
     : m_level(LogLevel::LL_DEBUG),
-      m_appendcb(std::bind(&defaultOutput,_1,_2)) //FIXME:使用backend_logger的io
+      m_appendcb(std::bind(&defaultOutput,_1,_2))
 {
 }
 
@@ -55,12 +59,22 @@ const char* Logger::getLevelStr(LogLevel l)
     return "UNKNOWN";
 }
 
+//FIXME: change to use chrono 
 void Logger::formatTime()
 {
     time_t now;
     now = time(&now);
     struct tm vtm;
     localtime_r(&now, &vtm);
-    m_stream << vtm.tm_year+1990 <<"-"<<vtm.tm_mon+1<<"-"<<vtm.tm_mday<<" "<<vtm.tm_hour<<":"<<vtm.tm_min<<":"<<vtm.tm_sec;
+
+    if (t_lastSecond != now)
+    {
+        t_lastSecond = now;
+        int len = snprintf(t_time, sizeof(t_time), "%4d%02d%02d %02d:%02d:%02d",vtm.tm_year+1990, vtm.tm_mon+1, vtm.tm_mday, vtm.tm_hour, vtm.tm_min, vtm.tm_sec);
+        assert(len == 17);
+    }
+
+    m_stream << std::string(t_time);
 }
 
+} //namespace water

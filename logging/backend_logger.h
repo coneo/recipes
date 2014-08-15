@@ -4,6 +4,9 @@
 #include "log_buffer.h"
 #include <vector>
 #include <memory>
+#include <thread>
+#include <condition_variable>
+#include <chrono>
 #include <pthread.h>
 
 namespace water {
@@ -25,7 +28,7 @@ public:
     void stop()
     {
         m_running = false;
-        pthread_join(m_threadId, NULL);
+        m_thread.join();
     }
 
     void threadFunc();
@@ -33,12 +36,13 @@ public:
 private:
     static const uint32_t M_bufReserveSize = 20;
     BufferPtr m_curBuf;
-    BufferVec m_emptyBufs;
+    BufferPtr m_nextBuf;
+    //BufferVec m_emptyBufs;
     BufferVec m_fullBufs;
     bool m_running;
-    pthread_t m_threadId;
-    pthread_mutex_t m_mutex;
-    pthread_cond_t  m_cond;
+    std::thread m_thread;
+    std::mutex m_mutex;
+    std::condition_variable m_cond;
 };
 
 }

@@ -15,6 +15,9 @@
 
 namespace water{
 
+typedef std::stringstream LogStream; //FIXME: move to a better one
+static thread_local LogStream m_stream;
+
 enum class LogLevel : uint8_t
 {
 	LL_DEBUG,
@@ -28,7 +31,6 @@ class Logger
 {
 public:
     typedef std::function<void(const char*,uint32_t)> AppendCallback;
-    typedef std::stringstream LogStream; //FIXME: move to a better one
 
     Logger();
     ~Logger() = default;
@@ -93,7 +95,6 @@ public:
 private:
     LogLevel m_level;
     AppendCallback m_appendcb;
-    LogStream m_stream;
 };
 
 

@@ -3,17 +3,13 @@
 #include <time.h>
 #include <cassert>
 
-using namespace water;
+namespace water{
 
 BackendLogger::BackendLogger()
     : m_curBuf(new Buffer),
-      m_mutex(PTHREAD_MUTEX_INITIALIZER),
-      m_cond(PTHREAD_COND_INITIALIZER)
+      m_nextBuf(new Buffer)
 {
     m_fullBufs.reserve(M_bufReserveSize);
-    m_emptyBufs.resize(M_bufReserveSize);
-    for (uint32_t i = 0; i < m_emptyBufs.size(); ++i)
-        m_emptyBufs[i].reset(new Buffer);
 }
 
 BackendLogger::~BackendLogger()
@@ -29,21 +25,19 @@ void BackendLogger::append(const char* msg, uint32_t len)
     else
     {
 #ifdef _HXQ_DEBUG
-        printf("%s,%s",__func__, "new buf");
+        printf("%s,%s\n",__func__, "new buf");
 #endif
         m_fullBufs.push_back(std::move(m_curBuf));
-        if (m_emptyBufs.size() > 0)
+        if (m_nextBuf)
         {
-            m_curBuf = std::move(m_emptyBufs.back());
-            m_emptyBufs.pop_back();
+            m_curBuf = std::move(m_nextBuf);
         }
         else
         {
-            //throw error
-            printf("mo more buffers\n");
+            m_curBuf.reset(new Buffer);
         }
         m_curBuf->put(msg, len);
-        pthread_cond_signal(&m_cond);
+        m_cond.notify_one();
     }
 }
 
@@ -54,51 +48,64 @@ void BackendLogger::threadFunc()
 #endif
     LogFile logFile("./game.log");
     logFile.load();
+    BufferPtr newBuffer1(new Buffer);
+    BufferPtr newBuffer2(new Buffer);
     BufferVec writeBufs;
-    BufferVec backBufs;
-    backBufs.resize(M_bufReserveSize);
-    for (uint32_t i = 0; i < backBufs.size(); ++i)
-        backBufs[i].reset(new Buffer);
-
+    writeBufs.reserve(16);
     while (m_running)
     {
-        pthread_mutex_lock(&m_mutex);
+        //m_mutex.lock();
+        assert(newBuffer1 && newBuffer1->length() == 0);
+        assert(newBuffer2 && newBuffer2->length() == 0);
         assert(writeBufs.size() == 0);
-        assert(backBufs.size() == M_bufReserveSize);
         if(m_fullBufs.empty())
         {
             //cond_wait
-            struct timespec abstime;
-            clock_gettime(CLOCK_REALTIME, &abstime);
-            abstime.tv_sec += 2;
-            pthread_cond_timedwait(&m_cond,&m_mutex,&abstime);
+            std::unique_lock<std::mutex> uqlock(m_mutex);
+            m_cond.wait_for(uqlock, std::chrono::seconds(3));
         }
-
         m_fullBufs.push_back(std::move(m_curBuf));
-        if (backBufs.size() > 0)
-        {
-            m_curBuf = std::move(backBufs.back());
-            backBufs.pop_back();
-        }
+        m_curBuf = std::move(newBuffer1);
         writeBufs.swap(m_fullBufs);
-        pthread_mutex_unlock(&m_mutex);
+        if (!m_nextBuf)
+        {
+            m_nextBuf = std::move(newBuffer2);
+        }
+        //m_mutex.unlock();
 
+        assert(!writeBufs.empty());
+
+        if (writeBufs.size() > 25)
+        {
+            //throw exception
+            printf("overflow writeBufs.size=%lu",(unsigned long)writeBufs.size());
+        }
         for (uint32_t i = 0; i < writeBufs.size(); ++i)
         {
             logFile.append(writeBufs[i]->data(), writeBufs[i]->length());
-            writeBufs[i]->reset();
         }
 
-        while (m_emptyBufs.size() < M_bufReserveSize && backBufs.size() > 0)
+        if (writeBufs.size() > 2)
         {
-            m_emptyBufs.push_back(std::move(backBufs.back()));
-            backBufs.pop_back();
+            writeBufs.resize(2);
         }
-        while (backBufs.size() < M_bufReserveSize && writeBufs.size() > 0)
+
+        if (!newBuffer1)
         {
-            backBufs.push_back(std::move(writeBufs.back()));
+            assert(!writeBufs.empty());
+            newBuffer1 = std::move(writeBufs.back());
             writeBufs.pop_back();
+            newBuffer1->reset();
         }
+
+        if (!newBuffer2)
+        {
+            assert(!writeBufs.empty());
+            newBuffer2 = std::move(writeBufs.back());
+            writeBufs.pop_back();
+            newBuffer2->reset();
+        }
+
         writeBufs.clear();
     }
 }
@@ -112,9 +119,8 @@ void* runThread(void* obj)
 
 void BackendLogger::start()
 {
-    if (pthread_create(&m_threadId, NULL, &runThread, this))
-    {
-        fprintf(stderr, "error when pthread_create,%s",__func__);
-    }
+    m_thread = std::thread(runThread, this);
     m_running = true;
 }
+
+} //namespace water

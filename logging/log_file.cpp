@@ -1,11 +1,10 @@
 #include "log_file.h"
 #include <string.h>
 #include <stdio.h>
-#include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
 
-using namespace water;
+namespace water{
 
 LogFile::LogFile(std::string filename)
     : m_filename(filename),
@@ -35,7 +34,21 @@ bool LogFile::load()
 
 ssize_t LogFile::writeto(const char* msg, const size_t len)
 {
+    std::unique_lock<std::mutex> uqlock(m_mutex);
+    m_cond.wait(uqlock, [&](){ return lock() != -1;});
     return ::write(m_fd, msg, len);
+}
+
+int32_t LogFile::lock()
+{
+    m_lock.l_type = F_WRLCK;
+    return ::fcntl(m_fd, F_SETLK, &m_lock);
+}
+
+int32_t LogFile::unlock()
+{
+    m_lock.l_type = F_UNLCK;
+    return ::fcntl(m_fd, F_SETLK, &m_lock);
 }
 
 void LogFile::append(const char* msg, const size_t len)
@@ -63,3 +76,4 @@ void LogFile::append(const char* msg, const size_t len)
     }
 }
 
+} //namespace water
