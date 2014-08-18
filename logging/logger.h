@@ -17,6 +17,7 @@ namespace water{
 
 typedef std::stringstream LogStream; //FIXME: move to a better one
 static thread_local LogStream m_stream;
+//__thread LogStream m_stream;
 
 enum class LogLevel : uint8_t
 {

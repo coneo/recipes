@@ -10,7 +10,7 @@ namespace water {
 class LogFile
 {
 public:
-    LogFile(std::string name);
+    LogFile(const std::string name);
     ~LogFile();
 
     bool load();

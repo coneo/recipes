@@ -5,8 +5,9 @@
 
 namespace water{
 
-BackendLogger::BackendLogger()
-    : m_curBuf(new Buffer),
+BackendLogger::BackendLogger(const std::string filename)
+    : m_filename(filename),
+      m_curBuf(new Buffer),
       m_nextBuf(new Buffer)
 {
     m_fullBufs.reserve(M_bufReserveSize);
@@ -46,7 +47,7 @@ void BackendLogger::threadFunc()
 #ifdef _HXQ_DEBUG
     printf("enter threadFunc\n");
 #endif
-    LogFile logFile("./game.log");
+    LogFile logFile(m_filename);
     logFile.load();
     BufferPtr newBuffer1(new Buffer);
     BufferPtr newBuffer2(new Buffer);
@@ -80,10 +81,16 @@ void BackendLogger::threadFunc()
             //throw exception
             printf("overflow writeBufs.size=%lu",(unsigned long)writeBufs.size());
         }
+#ifdef _HXQ_DEBUG
+        printf("before writeBufs.size()=%lu\n",(unsigned long)writeBufs.size());
+#endif
         for (uint32_t i = 0; i < writeBufs.size(); ++i)
         {
             logFile.append(writeBufs[i]->data(), writeBufs[i]->length());
         }
+#ifdef _HXQ_DEBUG
+        printf("after writeBufs.size()=%lu\n",(unsigned long)writeBufs.size());
+#endif
 
         if (writeBufs.size() > 2)
         {

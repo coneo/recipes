@@ -6,7 +6,7 @@
 
 namespace water{
 
-LogFile::LogFile(std::string filename)
+LogFile::LogFile(const std::string filename)
     : m_filename(filename),
       m_fd(1) //标准输出
 {
@@ -35,8 +35,10 @@ bool LogFile::load()
 ssize_t LogFile::writeto(const char* msg, const size_t len)
 {
     std::unique_lock<std::mutex> uqlock(m_mutex);
-    m_cond.wait(uqlock, [&](){ return lock() != -1;});
-    return ::write(m_fd, msg, len);
+    m_cond.wait_for(uqlock, std::chrono::seconds(4), [&](){ return lock() != -1;});
+    ssize_t size = ::write(m_fd, msg, len);
+    unlock();
+    return size;
 }
 
 int32_t LogFile::lock()

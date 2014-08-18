@@ -18,7 +18,7 @@ public:
     typedef std::unique_ptr<Buffer> BufferPtr;
     typedef std::vector<BufferPtr> BufferVec;
 
-    BackendLogger();
+    BackendLogger(const std::string filename);
     ~BackendLogger();
 
     void append(const char* msg, uint32_t len);
@@ -35,6 +35,7 @@ public:
 
 private:
     static const uint32_t M_bufReserveSize = 20;
+    std::string m_filename;
     BufferPtr m_curBuf;
     BufferPtr m_nextBuf;
     //BufferVec m_emptyBufs;
