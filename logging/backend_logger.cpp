@@ -19,6 +19,7 @@ BackendLogger::~BackendLogger()
 
 void BackendLogger::append(const char* msg, uint32_t len)
 {
+    m_mutex.lock();
     if (m_curBuf->remain() > len)
     {
         m_curBuf->put(msg, len);
@@ -40,6 +41,7 @@ void BackendLogger::append(const char* msg, uint32_t len)
         m_curBuf->put(msg, len);
         m_cond.notify_one();
     }
+    m_mutex.unlock();
 }
 
 void BackendLogger::threadFunc()
@@ -52,7 +54,7 @@ void BackendLogger::threadFunc()
     BufferPtr newBuffer1(new Buffer);
     BufferPtr newBuffer2(new Buffer);
     BufferVec writeBufs;
-    writeBufs.reserve(16);
+    writeBufs.reserve(M_bufReserveSize);
     while (m_running)
     {
         //m_mutex.lock();
