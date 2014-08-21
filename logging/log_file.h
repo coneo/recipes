@@ -15,13 +15,14 @@ public:
 
     bool load();
 
+    void append(const char* msg, const size_t line);
+
+private:
     ssize_t writeto(const char* msg, const size_t line);
 
     int32_t lock();
 
     int32_t unlock();
-
-    void append(const char* msg, const size_t line);
 
 private:
     std::string m_filename;

@@ -119,16 +119,9 @@ void BackendLogger::threadFunc()
     }
 }
 
-void* runThread(void* obj)
-{
-    BackendLogger* bkLogger = reinterpret_cast<BackendLogger*>(obj);
-    bkLogger->threadFunc();
-    return NULL;
-}
-
 void BackendLogger::start()
 {
-    m_thread = std::thread(runThread, this);
+    m_thread = std::thread(std::mem_fn(&BackendLogger::threadFunc), this);
     m_running = true;
 }
 

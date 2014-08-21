@@ -14,7 +14,7 @@ namespace water {
 class BackendLogger
 {
 public:
-    typedef LogBuffer<BIG_BUFFER_SIZE> Buffer;
+    typedef LogBuffer Buffer;
     typedef std::unique_ptr<Buffer> BufferPtr;
     typedef std::vector<BufferPtr> BufferVec;
 
