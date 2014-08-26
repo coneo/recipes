@@ -8,8 +8,11 @@ namespace water{
 
 LogFile::LogFile(const std::string filename)
     : m_filename(filename),
-      m_fd(1) //标准输出
+      m_curFilename(""),
+      m_fd(1), //标准输出
+      m_logHour(0)
 {
+    roll();
 }
 
 LogFile::~LogFile()
@@ -20,15 +23,17 @@ LogFile::~LogFile()
 bool LogFile::load()
 {
     mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-    m_fd = ::open(m_filename.c_str(), O_WRONLY | O_APPEND | O_CREAT, mode);
+    m_fd = ::open(m_curFilename.c_str(), O_WRONLY | O_APPEND | O_CREAT, mode);
     if (-1 == m_fd)
     {
         m_fd = 1; //重新定位到标准输出
-        printf("can't open log file: %s\n", m_filename.c_str());
+        printf("can't open log file: %s\n", m_curFilename.c_str());
         printf("Error no is: %d\n", errno);
         printf("Error description is:%s\n", strerror(errno));
         return false;
     }
+    ::unlink(m_filename.c_str());
+    ::symlink(m_curFilename.c_str(), m_filename.c_str());
     return true;
 }
 
@@ -55,6 +60,9 @@ int32_t LogFile::unlock()
 
 void LogFile::append(const char* msg, const size_t len)
 {
+    if (m_logHour != timeNow().tm_hour)
+        roll();
+
     ssize_t n = writeto(msg, len);
     if (-1 == n)
     {
@@ -76,6 +84,31 @@ void LogFile::append(const char* msg, const size_t len)
         }
         rest -= rt;
     }
+}
+
+std::string LogFile::getFileNameBynow()
+{
+    struct tm vtm = timeNow();
+    char t_time[32];
+    snprintf(t_time, sizeof(t_time), ".%4d%02d%02d-%02d", vtm.tm_year+1990, vtm.tm_mon+1, vtm.tm_mday, vtm.tm_hour);
+    return m_filename + t_time;
+}
+
+void LogFile::roll()
+{
+    m_curFilename = getFileNameBynow();
+    load();
+
+    m_logHour = timeNow().tm_hour;
+}
+
+tm LogFile::timeNow()
+{
+    time_t now;
+    now = time(&now);
+    struct tm vtm;
+    localtime_r(&now, &vtm);
+    return vtm;
 }
 
 } //namespace water

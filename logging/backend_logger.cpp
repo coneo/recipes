@@ -50,7 +50,6 @@ void BackendLogger::threadFunc()
     printf("enter threadFunc\n");
 #endif
     LogFile logFile(m_filename);
-    logFile.load();
     BufferPtr newBuffer1(new Buffer);
     BufferPtr newBuffer2(new Buffer);
     BufferVec writeBufs;

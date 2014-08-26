@@ -27,4 +27,4 @@ test_FileLock2: test_FileLock2.cpp
 test_ConditionVar: test_ConditionVar.cpp
 
 clean:
-	rm -f $(TESTS) *.log ../*.log
+	rm -f $(TESTS) *.log ../*.log*

@@ -25,8 +25,9 @@ void Logger::log(LogLevel level, char* format, ...)
     //append cb
 }*/
 
-__thread char t_time[18];
-__thread time_t t_lastSecond;
+thread_local LogStream m_stream;
+thread_local char t_time[18];
+thread_local time_t t_lastSecond;
 
 void defaultOutput(const char* msg, uint32_t len)
 {
