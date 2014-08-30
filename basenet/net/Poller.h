@@ -2,13 +2,16 @@
 
 #include "EventLoop.h"
 
+#include <chrono>
 #include <vector>
 #include <map>
 
-namespace Walle
+struct pollfd;
+
+namespace walle
 {
 
-struct pollfd;
+typedef std::chrono::high_resolution_clock Clock;
 
 class Channel;
 
@@ -20,7 +23,7 @@ public:
     Poller(EventLoop* loop);
     ~Poller();
 
-    Timestamp poll(int timeoutMs, ChannelList* activeChannels);
+    Clock::time_point poll(int timeoutMs, ChannelList* activeChannels);
 
     void updateChannel(Channel* channel);
 
@@ -36,4 +39,4 @@ private:
     PollFdList mPollfds;
     ChannelMap mChannels;
 };
-}//namespace Walle
+}//namespace walle

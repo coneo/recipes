@@ -4,7 +4,7 @@
 
 void* startThread(void*data);
 
-using namespace Walle;
+using namespace walle;
 
 Thread::Thread(const ThreadFunc& func, std::string name)
     : mPthreadID(0),

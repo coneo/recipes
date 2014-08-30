@@ -1,14 +1,16 @@
 #include "EventLoop.h"
-#include <poll.h>
+#include "Channel.h"
+#include "Poller.h"
 #include <iostream>
 
-using namespace Walle;
+using namespace walle;
 
 __thread EventLoop* t_loopInThisThread = 0;
+const int kPollTimeMs = 10000;
 
 EventLoop::EventLoop()
-	: mLooping(false),
-	mThreadID(CurrentThread::tid())
+	: mThreadID(CurrentThread::tid()),
+      mPoller(new Poller(this))
 {
     std::cout << "EventLoop create " << this << " in thread" << mThreadID << std::endl;
 	if (t_loopInThisThread)
@@ -33,11 +35,32 @@ void EventLoop::loop()
 	assert(!mLooping);
 	assertInLoopThread();
 	mLooping = true;
-
-	::poll(NULL, 0, 5*1000);
+    mQuit = false;
+    
+    while (!mQuit)
+    {
+        mActiveChannels.clear();
+        mPoller->poll(kPollTimeMs, &mActiveChannels);
+        for (auto it = mActiveChannels.begin(); it != mActiveChannels.end(); ++it)
+        {
+            (*it)->handleEvent();
+        }
+    }
 
 	std::cout << "EventLoop" << "stop looping" << std::endl;
 	mLooping = false;
+}
+
+void EventLoop::quit()
+{
+    mQuit = true;
+}
+
+void EventLoop::updateChannel(Channel* channel)
+{
+    assert(channel && channel->ownerLoop() == this);
+    assertInLoopThread();
+    mPoller->updateChannel(channel);
 }
 
 void EventLoop::abortNotInLoopThread()

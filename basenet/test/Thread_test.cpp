@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <boost/bind.hpp>
 
-using namespace Walle;
+using namespace walle;
 
 void threadFunc1()
 {

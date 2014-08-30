@@ -3,7 +3,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 
-namespace Walle
+namespace walle
 {
 class EventLoop;
 
@@ -53,4 +53,4 @@ private:
     EventCallback mErrorCallback;
 };
 
-}//namespace Walle
+}//namespace walle

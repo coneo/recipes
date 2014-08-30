@@ -2,10 +2,12 @@
 
 #include "../base/Thread.h"
 #include <boost/noncopyable.hpp>
+#include <boost/scoped_ptr.hpp>
 
-namespace Walle
+namespace walle
 {
 class Channel;
+class Poller;
 
 class EventLoop : boost::noncopyable
 {
@@ -15,6 +17,10 @@ public:
 
 	void loop();
 
+    void quit();
+
+    void updateChannel(Channel* channel);
+
 	void assertInLoopThread()
 	{
 		if (!isInLoopThread())
@@ -23,13 +29,17 @@ public:
 		}
 	}
 
-	bool isInLoopThread() const { return mThreadID == CurrentThread::tid(); }
+	bool isInLoopThread() const { return mThreadID == CurrentThread::tid();}
 
 private:
-
 	void abortNotInLoopThread();
 
-	bool mLooping;
+private:
+    typedef std::vector<Channel*> ChannelList;
+	bool mLooping = false;
+    bool mQuit = false;
 	const pid_t mThreadID;
+    boost::scoped_ptr<Poller> mPoller;
+    ChannelList mActiveChannels;
 };
-} //namespace Walle
+} //namespace walle

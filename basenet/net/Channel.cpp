@@ -1,4 +1,8 @@
 #include "Channel.h"
+#include "EventLoop.h"
+#include <poll.h>
+
+using namespace walle;
 
 const int Channel::kNoneEvent = 0;
 const int Channel::kReadEvent = POLLIN | POLLPRI;

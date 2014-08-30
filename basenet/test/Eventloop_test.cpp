@@ -4,6 +4,6 @@
 
 int main()
 {
-    Walle::EventLoop loop;
+    walle::EventLoop loop;
     loop.loop();
 }

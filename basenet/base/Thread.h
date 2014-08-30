@@ -4,7 +4,7 @@
 #include <boost/function.hpp>
 #include <pthread.h>
 
-namespace Walle
+namespace walle
 {
 class Thread : boost::noncopyable
 {
@@ -32,4 +32,4 @@ namespace CurrentThread
 {
     pid_t tid();
 }
-} //namespace Walle
+} //namespace walle
