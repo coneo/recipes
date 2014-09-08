@@ -11,10 +11,15 @@ using namespace water;
 int32_t g_total;
 FILE* g_file;
 std::shared_ptr<BackendLogger> bkLogger;
-struct stFoo
+struct stFoo : public IFormartAble
 {
     int a{2};
     std::string s{"hello"};
+public:
+    void appendToString(std::string* str) const override
+    {
+        str->append(s);
+    }
 };
 
 LogStream& operator << (LogStream& ss, stFoo& foo)
@@ -46,9 +51,9 @@ void bench(bool flag=false)
     for (int i = 0; i < batch; ++i)
     {
         if (flag)
-            LOG_DEBUG("%s %s %d","Hello 0123456789","abcdefghijklmnopqrstuvwxyz", i);
+            LOG_DEBUG("{} {} {}","Hello 0123456789","abcdefghijklmnopqrstuvwxyz", i);
         else
-            LOG_TRACE("%s %s %d","Hello 0123456789","abcdefghijklmnopqrstuvwxyz", i);
+            LOG_TRACE("{} {} {}","Hello 0123456789","abcdefghijklmnopqrstuvwxyz", i);
     }
 
     end = std::chrono::system_clock::now();
@@ -63,14 +68,14 @@ int main(int argc, char**argv)
     bkLogger.reset(new BackendLogger("./game.log"));
     bkLogger->start();
     gLogger.setAppendCallback(std::bind(dumpfunc,_1, _2));
-    LOG_DEBUG("int=%d,str=%s", 25,"hello");
+    LOG_DEBUG("int={some int},str={your name}", 25,"hello");
     LOG_DEBUG("hello logging");
 
     int a{32};
     float f{33.3};
     std::string s{"logging"};
     stFoo foo;
-    LOG_TRACE("int=%u,float=%f, %s", a, f, foo);
+    LOG_TRACE("int={},float={}, {foo data}", a, f, foo);
 
     bool flag = (argc>1)?true:false;
     bench(flag);

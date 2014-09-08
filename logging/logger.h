@@ -7,6 +7,7 @@
 #ifndef WATER_BASE_LOGGER_HPP
 #define WATER_BASE_LOGGER_HPP
 
+#include "format.h"
 #include <functional>
 #include <iostream>
 #include <sstream>
@@ -40,7 +41,8 @@ public:
     {
         formatTime();
         m_stream <<" "<< getLevelStr(level) << ": ";
-        print(args...);
+        //print(args...);
+        m_stream << format(args...);
         m_stream << " - " << file << ":" << line;
         m_stream << "\n";
 
@@ -59,38 +61,6 @@ public:
     LogLevel level() const { return m_level; }
 
     const char* getLevelStr(LogLevel l);
-
-public:
-    void print(const char* s)
-    {
-        while (*s)
-        {
-            if (*s == '%' && *++s != '%')
-                throw std::runtime_error("miss arg");
-            m_stream << *s++;
-        }
-    }
-
-    template<typename T, typename... Args>
-    void print(const char* s, T value, Args... args)
-    {
-        while (*s)
-        {
-            if (*s == '%' && *++s != '%')
-            {
-                m_stream << value;
-                return print(++s, args...);
-            }
-            m_stream << *s++;
-        }
-        throw std::runtime_error("extra arg");
-    }
-
-    void printout()
-    {
-        std::cout << m_stream.str();
-        m_stream.clear();
-    }
 
 private:
     LogLevel m_level;
