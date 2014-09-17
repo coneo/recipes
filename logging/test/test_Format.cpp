@@ -14,11 +14,11 @@ void formatStr()
 
 void formatClass()
 {
-    struct stFoo : public IFormartAble
+    struct stFoo /*: public IFormartAble*/
     {
         std::string str{"hello shok"};
 
-        void appendToString(std::string* str) const override
+        void appendToString(std::string* str) const /*override*/
         {
             str->append(this->str);
         }

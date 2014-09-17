@@ -26,8 +26,9 @@ inline
 typename std::enable_if<std::is_class<T>::value, void>::type
 appendToString(std::string* str, const T& arg)
 {
-    const IFormartAble* fa = &arg;
-    fa->appendToString(str);
+//    const IFormartAble* fa = &arg;
+//    fa->appendToString(str);
+    arg.appendToString(str);
 }
 
 //整形
