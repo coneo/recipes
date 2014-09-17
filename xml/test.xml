@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<config name="hello shok">
+    <node_a index="1222222" index2="234.567">
+        <item id="1" name="hello"/>
+        <item id="2" name="shok"/>
+        <item id="3" name="bug"/>
+    </node_a>
+    <node_b float="3.1415926" int="223344">
+        <item id="1" name="hello"/>
+        <item id="2" name="shok"/>
+        <item id="3" name="bug"/>
+    </node_b>
+</config>
