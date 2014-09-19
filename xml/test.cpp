@@ -1,11 +1,38 @@
 #include "xmlparser.h"
 #include <string>
 #include <iostream>
+#include <sstream>
+#include <map>
 
 using namespace std;
 
+class stFoo
+{
+public:
+    stFoo()
+    {
+        itemList.clear();
+    }
+    std::string toStr()
+    {
+        std::ostringstream os;
+        os << "index=" << index << std::endl;
+        os << "index2=" << index2 << std::endl;
+        for (const auto& item : itemList)
+        {
+            os << "item: id=" << item.first << " name=" << item.second << std::endl;
+        }
+        return os.str();
+    }
+    int32_t index {0};
+    float index2 {0.0};
+    std::map<int32_t,std::string> itemList;
+};
+
 bool loadConfig()
 {
+    stFoo foo;
+
     XmlParser xml;
     if (!xml.initFile("test.xml")) return false;
 
@@ -16,7 +43,8 @@ bool loadConfig()
         return false;
     }
 
-    std::string configname = root.getStr("name");
+    std::string configname = "";
+    root.getStr("name", configname);
     cout << configname << endl;
 
     //parse node_a
@@ -24,33 +52,18 @@ bool loadConfig()
     if (!nodeA.valid())
         return false;
 
-    int index = nodeA.getNum<int>("index");
-    cout << "node_a index=" << index << endl;
-
-    float index2 = nodeA.getNum<float>("index2");
-    cout << "node_a index2=" << index2 << endl;
-
+    nodeA.getNum("index", foo.index);
+    nodeA.getNum("index2", foo.index2);
     for (XmlNode item = nodeA.getChild("item"); item.valid(); ++item)
     {
-        int id = item.getNum<int>("id");
-        std::string name = item.getStr("name");
-        cout << "item id=" << id << " name=" << name << endl;
+        int id = 0;
+        item.getNum("id", id);
+        std::string name = "";
+        item.getStr("name", name);
+        foo.itemList[id] = name;
     }
-    cout << endl;
+    cout << foo.toStr() << endl;
 
-    //parse node_b
-    XmlNode nodeB = root.getChild("node_b");
-    if (!nodeB.valid())
-        return false;
-
-    cout << "node_b float=" << nodeB.getNum<float>("float") << endl;
-    cout << "node_b int=" << nodeB.getNum<int>("int") << endl;
-    for (XmlNode item = nodeB.getChild("item"); item.valid(); ++item)
-    {
-        int id = item.getNum<int>("id");
-        std::string name = item.getStr("name");
-        cout << "item id=" << id << " name=" << name << endl;
-    }
     return true;
 }
 

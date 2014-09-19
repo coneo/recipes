@@ -15,34 +15,33 @@ public:
 
     bool valid() { return m_node != NULL; }
 
-    XmlNode getChild(const char* nodename);
+    XmlNode getChild(const char* nodename = NULL);
 
-    template <typename T>
-    typename std::enable_if<std::is_integral<T>::value, T>::type
-        getNum(const char* nodename)
+    template <typename T,
+             typename std::enable_if<std::is_integral<T>::value>::type* = nullptr>
+    bool getNum(const char* nodename, T& value)
     {
         char* tmp = NULL;
         tmp = (char*)xmlGetProp(m_node, (xmlChar*)nodename);
-        if (tmp == NULL) return 0;
-        T value = std::stoi(tmp);
+        if (tmp == NULL) return false;
+        value = std::stoll(tmp);
         if (tmp) xmlFree(tmp);
-        return value;
+        return true;
     }
 
-    template <typename T>
-    typename std::enable_if<std::is_floating_point<T>::value, T>::type
-        getNum(const char* nodename)
+    template <typename T,
+             typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
+    bool getNum(const char* nodename, T& value)
     {
         char* tmp = NULL;
         tmp = (char*)xmlGetProp(m_node, (xmlChar*)nodename);
-        if (tmp == NULL) return 0.0;
-        //T value = std::stof(tmp);
-        T value = std::stod(tmp);
+        if (tmp == NULL) return false;
+        value = std::stold(tmp);
         if (tmp) xmlFree(tmp);
-        return value;
+        return true;
     }
 
-    std::string getStr(const char* nodename);
+    bool getStr(const char* nodename, std::string& str);
 
     XmlNode& operator++();
 

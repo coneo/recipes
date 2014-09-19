@@ -11,8 +11,10 @@ XmlNode::~XmlNode()
 
 XmlNode XmlNode::getChild(const char* nodename)
 {
+    if (!m_node) return XmlNode(NULL);
     xmlNodePtr nextNode = m_node->xmlChildrenNode;
     if (!nextNode) return XmlNode(NULL);
+    if (!nodename) return XmlNode(nextNode); //默认返回它的第一个节点
 
     while (xmlStrcmp(nextNode->name, (const xmlChar*)nodename))
     {
@@ -23,6 +25,7 @@ XmlNode XmlNode::getChild(const char* nodename)
 
 void XmlNode::setToNext()
 {
+    if (!m_node) return ;
     xmlNodePtr nextNode = m_node->next;
     while (nextNode && xmlStrcmp(nextNode->name, (const xmlChar*)m_node->name))
     {
@@ -31,14 +34,15 @@ void XmlNode::setToNext()
     m_node = nextNode;
 }
 
-std::string XmlNode::getStr(const char* nodename)
+bool XmlNode::getStr(const char* nodename, std::string& str)
 {
+    if (!m_node || !nodename) return false;
     char* tmpstr = NULL;
     tmpstr = (char *)xmlGetProp(m_node, (xmlChar *)nodename);
     if (tmpstr == NULL) return "";
-    std::string retstr = tmpstr;
+    str = tmpstr;
     if (tmpstr) xmlFree(tmpstr);
-    return retstr;
+    return true;
 }
 
 XmlNode& XmlNode::operator++()
