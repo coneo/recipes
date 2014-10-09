@@ -2,6 +2,7 @@
 #define WATER_BASE_DB_HPP
 
 #include "mysql.h"
+#include <sstream>
 #include <vector>
 #include <map>
 
@@ -85,8 +86,27 @@ public:
 
     void print();
 
+    bool read();
+
+    template <typename T>
+    bool get(std::string name, T& value)
+    {
+        if (m_rowIndex < 0 || m_rowIndex >= m_datas.size()) return false;
+        auto data = m_datas[m_rowIndex];
+        auto iter = data.find(name);
+        if (iter != data.end())
+        {
+            std::stringstream ss;
+            ss << iter->second.data();
+            ss >> value;
+            return true;
+        }
+        return false;
+    }
+
 private:
     std::vector<std::map<std::string, FieldValue>> m_datas;
+    uint32_t m_rowIndex = -1;
 };
 
 class SqlCommand

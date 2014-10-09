@@ -105,6 +105,11 @@ void DataReader::print()
     }
 }
 
+bool DataReader::read()
+{
+    return (++m_rowIndex < m_datas.size());
+}
+
 int32_t SqlCommand::executeNoQuery()
 {
     if (!m_conn || !m_conn->handle()) return -1;
