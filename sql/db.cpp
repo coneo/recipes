@@ -27,7 +27,7 @@ bool Connection::connect()
                             m_coninfo->m_user.c_str(),
                             m_coninfo->m_passwd.c_str(),
                             m_coninfo->m_dbname.c_str(),
-                            3306,
+                            m_coninfo->m_port,
                             NULL,
                             CLIENT_COMPRESS | CLIENT_MULTI_STATEMENTS | CLIENT_INTERACTIVE))
     {
@@ -53,7 +53,7 @@ int32_t FieldValue::setData(const char* data, uint32_t len)
 
 void DataReader::fillData(Connection* con)
 {
-    //考虑用smartptr来管理MYSQL_RES
+    //FIXME:用scope_guard来管理MYSQL_RES
     MYSQL_RES* result = mysql_store_result(con->handle());
     if (result == NULL)
     {
@@ -63,6 +63,7 @@ void DataReader::fillData(Connection* con)
     uint32_t num_rows = mysql_num_rows(result);
     if (num_rows == 0)
     {
+        mysql_free_result(result);
         return ;
     }
     uint32_t num_fields = mysql_num_fields(result);
@@ -70,6 +71,7 @@ void DataReader::fillData(Connection* con)
     fields = mysql_fetch_fields(result);
     if (fields == NULL)
     {
+        mysql_free_result(result);
         return ;
     }
 
@@ -81,6 +83,7 @@ void DataReader::fillData(Connection* con)
         lengths = mysql_fetch_lengths(result);
         if (!lengths)
         {
+            mysql_free_result(result);
             return ;
         }
         std::map<std::string, FieldValue> fieldDatas;
@@ -91,6 +94,7 @@ void DataReader::fillData(Connection* con)
         }
         m_datas.push_back(fieldDatas);
     }
+    mysql_free_result(result);
 }
 
 void DataReader::print()
@@ -127,12 +131,19 @@ DataReader SqlCommand::executeReader()
     return reader;
 }
 
-bool DB::init(std::string host, std::string user, std::string passwd, std::string dbname)
+uint32_t SqlCommand::getAffectedRows() const
+{
+    if (!m_conn || !m_conn->handle()) return 0;
+    return mysql_affected_rows(m_conn->handle());
+}
+
+bool DB::init(std::string host, std::string user, std::string passwd, std::string dbname, uint32_t port)
 {
     m_coninfo.m_host = host;
     m_coninfo.m_user = user;
     m_coninfo.m_passwd = passwd;
     m_coninfo.m_dbname = dbname;
+    m_coninfo.m_port = port;
     MYSQL* mysql = getHandle();
     if (!mysql)
     {
@@ -192,7 +203,7 @@ MYSQL* DB::getHandle()
     if (m_nowcon)
         return m_nowcon->handle();
 
-    m_nowcon = getConnection();
+    m_nowcon = getUseConnection();
     if (m_nowcon)
         return m_nowcon->handle();
     return NULL;
@@ -204,7 +215,7 @@ void DB::putHandle()
         m_nowcon->setState(ConState::IDLE);
 }
 
-Connection* DB::getConnection()
+Connection* DB::getUseConnection()
 {
     for (auto& con : m_connections)
     {
@@ -224,10 +235,10 @@ Connection* DB::getConnection()
     return  NULL;
 }
 
-Connection* DB::getBkConnection()
+Connection* DB::getConnection()
 {
     if (m_nowcon) return m_nowcon;
-    m_nowcon = getConnection();
+    m_nowcon = getUseConnection();
     if (m_nowcon)
         return m_nowcon;
     return NULL;
@@ -238,7 +249,7 @@ int32_t DB::doDelete(TableInfo* table)
 {
     if (!table) return -1;
     std::string sql = "DELETE FROM " + table->m_name;
-    SqlCommand* cmd = new SqlCommand(sql, getBkConnection());
+    SqlCommand* cmd = new SqlCommand(sql, getConnection());
     if (cmd)
     {
         cmd->executeNoQuery();

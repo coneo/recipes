@@ -9,6 +9,8 @@
 namespace water{
 namespace componet{
 
+static const uint32_t DEFAULT_MYSQL_PORT = 3306;
+
 enum class DBRetcode : uint32_t
 {
     SUCCESS = 0,
@@ -25,6 +27,7 @@ struct ConnectionInfo
     std::string m_user = "";
     std::string m_passwd = "";
     std::string m_dbname = "";
+    uint32_t m_port = 0;
 };
 
 class Connection
@@ -122,6 +125,8 @@ public:
 
     DataReader executeReader();
 
+    uint32_t getAffectedRows() const;
+
 private:
     std::string m_sql;
     Connection* m_conn;
@@ -130,7 +135,7 @@ private:
 class DB
 {
 public:
-    bool init(std::string host, std::string user, std::string passwd, std::string dbname);
+    bool init(std::string host, std::string user, std::string passwd, std::string dbname, uint32_t port=DEFAULT_MYSQL_PORT);
 
     TableInfo* getTable(std::string tbname);
 
@@ -138,9 +143,9 @@ public:
 
     void putHandle();
 
-    Connection* getConnection();
+    Connection* getUseConnection();
 
-    Connection* getBkConnection();
+    Connection* getConnection();
 
     //int32_t doDelete(TableInfo* table);
 
