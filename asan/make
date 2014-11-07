@@ -1,0 +1,2 @@
+./a.out 2>log
+./asan_symbolize.py / < log | c++filt
