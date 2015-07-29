@@ -1,7 +1,7 @@
 #include "bvtree.h"
 #include <sstream>
 
-bool test_create()
+void test_create()
 {
     bvtree::BvNode* root = new bvtree::BvNode(NULL);
     for (int i = 0; i < 5; ++i)
@@ -18,6 +18,10 @@ bool test_create()
     }
 
     root->printOut();
+}
+
+void tree_tick()
+{
 }
 
 int main()

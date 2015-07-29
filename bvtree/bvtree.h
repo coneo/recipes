@@ -12,7 +12,7 @@ namespace bvtree
         delete x;
 
 #define MaxBvChildNodeCnt 16
-#define InvalidBvChildNodeIndex BvChildNodeCnt
+#define InvalidBvChildNodeIndex MaxBvChildNodeCnt
 
     enum BvRunningState
     {
@@ -21,11 +21,20 @@ namespace bvtree
         BRS_Error  = -1,
     };
 
+    enum BvTerminalState
+    {
+        BTS_Ready = 1,
+        BTS_Running = 2,
+        BTS_Finish = 3,
+    };
+
+    //条件类
     class BvNodePrecondition
     {
     public:
         virtual bool externalCondition(/*input*/) const = 0;
     };
+    //条件 真
     class BvNodePreconditionTRUE : public BvNodePrecondition
     {
     public:
@@ -34,6 +43,7 @@ namespace bvtree
             return true;
         }
     };
+    //条件 假
     class BvNodePreconditionFALSE : public BvNodePrecondition
     {
     public:
@@ -42,6 +52,7 @@ namespace bvtree
             return false;
         }
     };
+    //条件否 一元运算
     class BvNodePreconditionNOT : public BvNodePrecondition
     {
     public:
@@ -63,14 +74,15 @@ namespace bvtree
     };
 
 
+    //节点类
     class BvNode
     {
     public:
-        BvNode(BvNode* parent)
+        BvNode(BvNode* parent, BvNodePrecondition* preCondition = NULL)
             : m_childCnt(0),
               m_parent(parent),
               m_name("nonename"),
-              m_preCondition(NULL)
+              m_preCondition(preCondition)
         {
             for (int i = 0; i < MaxBvChildNodeCnt; ++i)
                 m_childs[i] = NULL;
@@ -129,7 +141,7 @@ namespace bvtree
             return index >= 0 && index < m_childCnt;
         }
 
-    private:
+    protected:
         BvNode* m_childs[MaxBvChildNodeCnt];
         int     m_childCnt;
         BvNode* m_parent;
@@ -137,7 +149,43 @@ namespace bvtree
         BvNodePrecondition* m_preCondition;
     };
 
+    //顺序节点
+    class BvNodeSequence : public BvNode
+    {
+    public:
+        BvNodeSequence(BvNode* parnet, BvNodePrecondition* preCondition = NULL)
+            : BvNode(parnet, preCondition),
+              m_curNodeIndex(InvalidBvChildNodeIndex)
+        {
+        }
+        virtual bool _doEvaluate(/*input*/) override;
+        virtual BvRunningState _doTick() override;
 
+    private:
+        int m_curNodeIndex;
+    };
+
+    //行为节点基类，需要用户去继承该类实现具体的行为节点
+    class BvNodeTerminal : public BvNode
+    {
+    public:
+        BvNodeTerminal(BvNode* parnet, BvNodePrecondition* preCondition = NULL)
+            : BvNode(parnet, preCondition),
+              m_state(BTS_Ready),
+              m_needExit(false)
+        {}
+
+        virtual BvRunningState _doTick();
+    protected:
+        virtual void _doEnter(/*input*/){}
+        virtual BvRunningState _doExecute(/*input,output*/){ return BRS_Finish; }
+        virtual void _doExit(/*input,BvRunningState*/){}
+    private:
+        BvTerminalState m_state;
+        bool m_needExit;
+    };
+
+    //节点工厂，用于生产各类节点
     class BvNodeFactory
     {
     public:
