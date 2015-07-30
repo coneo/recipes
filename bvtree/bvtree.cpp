@@ -47,4 +47,33 @@ BvRunningState BvNodeSequence::_doTick()
     return isFinish;
 }
 
+BvRunningState BvNodeTerminal::_doTick()
+{
+    BvRunningState isFinish = BRS_Finish;
+
+    if (m_state == BTS_Ready)
+    {
+        _doEnter();
+        m_needExit = true;
+        m_state = BTS_Running;
+        //setActiveNode(this);
+    }
+    if (m_state == BTS_Running)
+    {
+        isFinish = _doExecute();
+        //setActiveNode(this);
+        if (isFinish == BRS_Finish || isFinish < 0)
+            m_state = BTS_Finish;
+    }
+    if (m_state == BTS_Finish)
+    {
+        if (m_needExit)
+            _doExit();
+        m_state = BTS_Ready;
+        m_needExit = false;
+        //setActiveNode(NULl);
+    }
+    return isFinish;
+}
+
 };

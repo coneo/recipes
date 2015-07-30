@@ -191,8 +191,17 @@ namespace bvtree
     public:
         static BvNode& onCreateSequenceNode(BvNode* parent, std::string nodeName)
         {
-            BvNode* node = new BvNode(parent);
+            BvNode* node = new BvNodeSequence(parent);
             onCreateCommon(node, parent, nodeName);
+            return (*node);
+        }
+
+        template <typename T>
+        static BvNode& onCreateTerminalNode(BvNode* parnet, std::string nodeName)
+        {
+            //FIXME check if T is subclass of BvNodeTerminal
+            BvNodeTerminal* node = new T(parnet);
+            onCreateCommon(node, parnet, nodeName);
             return (*node);
         }
 
