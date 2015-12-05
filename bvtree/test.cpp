@@ -2,6 +2,7 @@
 #include <sstream>
 #include <string>
 #include <iostream>
+#include <unistd.h>
 
 using namespace std;
 using namespace bvtree;
@@ -25,6 +26,18 @@ void test_create()
     root->printOut();
 }
 
+
+struct stMoveInput
+{
+    int x;
+    int y;
+};
+struct stMoveOutput
+{
+    int x;
+    int y;
+};
+
 class Node_MoveTo : public BvNodeTerminal
 {
 public:
@@ -32,9 +45,10 @@ public:
         : BvNodeTerminal(parnet)
     {}
 protected:
-    virtual BvRunningState _doExecute(/*input,output*/) override
+    virtual BvRunningState _doExecute(const BvInputParam& input, BvOutputParam& output) override
     {
-        cout << "move to action" << endl;
+        const stMoveInput& inputData = input.getRealData<stMoveInput>();
+        cout << "move to action x:" << inputData.x << " y:" << inputData.y << endl;
         return BRS_Finish;
     }
 };
@@ -45,7 +59,7 @@ public:
         : BvNodeTerminal(parnet)
     {}
 protected:
-    virtual BvRunningState _doExecute() override
+    virtual BvRunningState _doExecute(const BvInputParam& input, BvOutputParam& output) override
     {
         cout << "idle action" << endl;
         return BRS_Finish;
@@ -66,22 +80,32 @@ public:
 
     void tick()
     {
-        if (m_root->evaluate())
+        static int tx=0,ty=0;
+        tx++; ty++;
+        m_input.x = tx;
+        m_input.y = ty;
+        BvInputParam input(&m_input);
+        BvOutputParam output(&m_output);
+        if (m_root->evaluate(input))
         {
-            m_root->tick();
+            m_root->tick(input,output);
         }
     }
 private:
     BvNode* m_root;
+    stMoveInput m_input;
+    stMoveOutput m_output;
 };
 
 void tree_tick()
 {
     tree_obj obj;
     obj.create();
-    obj.tick();
-    obj.tick();
-    obj.tick();
+    while (true)
+    {
+        sleep(1);
+        obj.tick();
+    }
 }
 
 int main()

@@ -2,7 +2,7 @@
 
 namespace bvtree
 {
-bool BvNodeSequence::_doEvaluate()
+bool BvNodeSequence::_doEvaluate(const BvInputParam& input)
 {
     unsigned int child_index = 0;
     if (m_curNodeIndex != InvalidBvChildNodeIndex)
@@ -11,13 +11,13 @@ bool BvNodeSequence::_doEvaluate()
     if (indexValid(child_index))
     {
         BvNode* child_node = m_childs[child_index];
-        if (child_node->evaluate())
+        if (child_node->evaluate(input))
             return true;
     }
     return false;
 }
 
-BvRunningState BvNodeSequence::_doTick()
+BvRunningState BvNodeSequence::_doTick(const BvInputParam& input, BvOutputParam& output)
 {
     BvRunningState isFinish = BRS_Finish;
 
@@ -27,7 +27,7 @@ BvRunningState BvNodeSequence::_doTick()
 
     //FIXME check index outbound
     BvNode* curNode = m_childs[m_curNodeIndex];
-    isFinish = curNode->tick();
+    isFinish = curNode->tick(input, output);
     if (isFinish == BRS_Finish)
     {
         ++m_curNodeIndex;
@@ -47,20 +47,20 @@ BvRunningState BvNodeSequence::_doTick()
     return isFinish;
 }
 
-BvRunningState BvNodeTerminal::_doTick()
+BvRunningState BvNodeTerminal::_doTick(const BvInputParam& input, BvOutputParam& output)
 {
     BvRunningState isFinish = BRS_Finish;
 
     if (m_state == BTS_Ready)
     {
-        _doEnter();
+        _doEnter(input);
         m_needExit = true;
         m_state = BTS_Running;
         //setActiveNode(this);
     }
     if (m_state == BTS_Running)
     {
-        isFinish = _doExecute();
+        isFinish = _doExecute(input, output);
         //setActiveNode(this);
         if (isFinish == BRS_Finish || isFinish < 0)
             m_state = BTS_Finish;
@@ -68,7 +68,7 @@ BvRunningState BvNodeTerminal::_doTick()
     if (m_state == BTS_Finish)
     {
         if (m_needExit)
-            _doExit();
+            _doExit(input, isFinish);
         m_state = BTS_Ready;
         m_needExit = false;
         //setActiveNode(NULl);

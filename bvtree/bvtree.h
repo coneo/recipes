@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <assert.h>
+#include "bv_anydata.h"
 
 namespace bvtree
 {
@@ -13,6 +14,9 @@ namespace bvtree
 
 #define MaxBvChildNodeCnt 16
 #define InvalidBvChildNodeIndex MaxBvChildNodeCnt
+
+    typedef BvAnyData BvInputParam;
+    typedef BvAnyData BvOutputParam;
 
     enum BvRunningState
     {
@@ -32,13 +36,13 @@ namespace bvtree
     class BvNodePrecondition
     {
     public:
-        virtual bool externalCondition(/*input*/) const = 0;
+        virtual bool externalCondition(const BvInputParam& input) const = 0;
     };
     //条件 真
     class BvNodePreconditionTRUE : public BvNodePrecondition
     {
     public:
-        virtual bool externalCondition() const override
+        virtual bool externalCondition(const BvInputParam& input) const override
         {
             return true;
         }
@@ -47,7 +51,7 @@ namespace bvtree
     class BvNodePreconditionFALSE : public BvNodePrecondition
     {
     public:
-        virtual bool externalCondition() const override
+        virtual bool externalCondition(const BvInputParam& input) const override
         {
             return false;
         }
@@ -64,9 +68,9 @@ namespace bvtree
         {
             SAFE_DELETE(m_lcondition);
         }
-        virtual bool externalCondition() const override
+        virtual bool externalCondition(const BvInputParam& input) const override
         {
-            return !m_lcondition->externalCondition();
+            return !m_lcondition->externalCondition(input);
         }
 
     private:
@@ -103,14 +107,14 @@ namespace bvtree
             return (*this);
         }
 
-        bool evaluate(/*input*/)
+        bool evaluate(const BvInputParam& input)
         {
-            return (m_preCondition == NULL || m_preCondition->externalCondition()) && _doEvaluate();
+            return (m_preCondition == NULL || m_preCondition->externalCondition(input)) && _doEvaluate(input);
         }
 
-        BvRunningState tick()
+        BvRunningState tick(const BvInputParam& input, BvOutputParam output)
         {
-            return _doTick();
+            return _doTick(input, output);
         }
 
         void setName(std::string name) { m_name = name; }
@@ -126,12 +130,12 @@ namespace bvtree
         }
 
     protected:
-        virtual bool _doEvaluate(/*input*/)
+        virtual bool _doEvaluate(const BvInputParam& input)
         {
             return true;
         }
 
-        virtual BvRunningState _doTick()
+        virtual BvRunningState _doTick(const BvInputParam& input, BvOutputParam& output)
         {
             return BRS_Finish;
         }
@@ -158,8 +162,8 @@ namespace bvtree
               m_curNodeIndex(InvalidBvChildNodeIndex)
         {
         }
-        virtual bool _doEvaluate(/*input*/) override;
-        virtual BvRunningState _doTick() override;
+        virtual bool _doEvaluate(const BvInputParam& input) override;
+        virtual BvRunningState _doTick(const BvInputParam& input, BvOutputParam& output) override;
 
     private:
         int m_curNodeIndex;
@@ -175,11 +179,11 @@ namespace bvtree
               m_needExit(false)
         {}
 
-        virtual BvRunningState _doTick();
+        virtual BvRunningState _doTick(const BvInputParam& input, BvOutputParam& output);
     protected:
-        virtual void _doEnter(/*input*/){}
-        virtual BvRunningState _doExecute(/*input,output*/){ return BRS_Finish; }
-        virtual void _doExit(/*input,BvRunningState*/){}
+        virtual void _doEnter(const BvInputParam& input){}
+        virtual BvRunningState _doExecute(const BvInputParam& input, BvOutputParam& output){ return BRS_Finish; }
+        virtual void _doExit(const BvInputParam& input,BvRunningState exitID){}
     private:
         BvTerminalState m_state;
         bool m_needExit;
