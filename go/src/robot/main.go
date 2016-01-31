@@ -17,5 +17,11 @@ func main(){
     //注册关闭回调
     defer conn.Conn.Close()
 
+    //发送登录信息到FL
+    //conn.SendRawMsg()
+
+    //接收处理FL
+    conn.Recv()
+
     return
 }
