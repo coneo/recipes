@@ -18,13 +18,16 @@ int main()
 
     int msecs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
-    DieEvt evt;
-    mgr.postEvent(&evt, sizeof(evt), msecs, 0);
-    mgr.postEvent(&evt, sizeof(evt), msecs, 1);
-    mgr.postEvent(&evt, sizeof(evt), msecs, 2);
+    for (int i = 0; i < 100; ++i)
+    {
+        DieEvt evt;
+        mgr.postEvent(&evt, sizeof(evt), msecs, 0);
+    }
 
 //    while (true)
     {
         mgr.loop();
     }
+
+    printf("inde:%d\n", inde);
 }
