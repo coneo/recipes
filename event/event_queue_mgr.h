@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _EVENT_QUEUE_MGR_H
+#define _EVENT_QUEUE_MGR_H
 
 #include "event_queue.h"
 
@@ -55,3 +56,5 @@ inline void EventQueueMgr::loop()
         _back_queue.erase();
     }
 }
+
+#endif // _EVENT_QUEUE_MGR_H

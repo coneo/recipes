@@ -1,4 +1,7 @@
-#pragma once
+#ifndef _EVENT_H
+#define _EVENT_H
+
+#pragma pack(1)
 
 enum EvtType
 {
@@ -24,3 +27,5 @@ struct DieEvt : public stEvent
     {
     }
 };
+
+#endif // _EVENT_H

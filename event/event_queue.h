@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _EVENT_QUEUE_H
+#define _EVENT_QUEUE_H
 
 #include <list>
 #include <chrono>
@@ -86,3 +87,5 @@ inline void EventQueue::copyfront(EventQueue& from)
     Evt* evt = from.front();
     _evts.push_back(evt);
 }
+
+#endif // _EVENT_QUEUE_H
