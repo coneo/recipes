@@ -29,5 +29,9 @@ int main()
 
         CALL_TIMES_AND_TIME(1000000, "11", f1()) // 126 毫秒
         CALL_TIMES_AND_TIME(1000000, "22", f2()) // 225 毫秒
+
+        // if (a.find(555) != a.end()) // 131 毫秒
+        // if (a.count(555)) // 99 毫秒
+        // count的方式居然效率比find的方式快,是因为比较么
     }
 }
